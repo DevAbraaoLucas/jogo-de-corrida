@@ -118,6 +118,7 @@ export class CollisionWorld {
               // Separa o carro.
               v.x += this.nx * this.depth;
               v.z += this.nz * this.depth;
+              v.contactTimer = 0.2;
               const strength = this.applyContactImpulse(v, rx, rz);
               if (strength > out.strength) {
                 out.strength = strength;

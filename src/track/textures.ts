@@ -217,3 +217,22 @@ export function arrowTexture(): Texture {
   }
   return finish(c, false);
 }
+
+/** Marcador no chão sob o carro do jogador: anel com seta para a frente (+V). */
+export function playerMarkerTexture(color = '#ffd23f'): Texture {
+  const [c, g] = canvas(128, 128);
+  g.clearRect(0, 0, 128, 128);
+  g.strokeStyle = color;
+  g.lineWidth = 7;
+  g.beginPath();
+  g.arc(64, 64, 52, -Math.PI / 2 + 0.5, (3 * Math.PI) / 2 - 0.5);
+  g.stroke();
+  g.fillStyle = color;
+  g.beginPath();
+  g.moveTo(64, 2);
+  g.lineTo(80, 22);
+  g.lineTo(48, 22);
+  g.closePath();
+  g.fill();
+  return finish(c, false);
+}

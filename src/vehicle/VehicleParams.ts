@@ -90,6 +90,8 @@ export interface VehicleParams {
   // --- Colisões ---
   restitution: number;
   wallFriction: number;
+  /** Giro (rad/s) permitido quando o carro está parado encostado numa barreira. */
+  wallTurnRate: number;
 }
 
 export const FUSCA_PARAMS: VehicleParams = {
@@ -139,4 +141,5 @@ export const FUSCA_PARAMS: VehicleParams = {
 
   restitution: 0.3,
   wallFriction: 0.25,
+  wallTurnRate: 1.6,
 };

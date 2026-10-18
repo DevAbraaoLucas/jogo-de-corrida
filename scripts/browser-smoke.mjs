@@ -17,7 +17,7 @@ async function open(viewport, mobile = false, query = '?debug') {
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   await page.goto(URL + query);
-  await page.waitForFunction(() => window.__game !== undefined, null, { timeout: 15000 });
+  await page.waitForFunction(() => window.__game !== undefined, null, { timeout: 60000 });
   await page.waitForTimeout(800);
   return page;
 }
@@ -102,18 +102,20 @@ if (scenario === 'fall') {
 }
 
 if (scenario === 'autopilot') {
-  const page = await open({ width: 1366, height: 768 }, false, '?debug&autopilot');
+  const page = await open({ width: 640, height: 360 }, false, '?debug&autopilot');
   await page.keyboard.press('Enter');
   const t0 = Date.now();
   let shot = false;
-  while (Date.now() - t0 < 90000) {
+  while (Date.now() - t0 < 600000) {
     await page.waitForTimeout(1000);
     const st = await state(page);
     if (!shot && st.time > 20) { await page.screenshot({ path: `${OUT}/20-autopilot-mid.png` }); shot = true; }
     if (st.state === 'finished') break;
   }
-  await page.waitForTimeout(2000);
+  await page.waitForFunction(() => !document.querySelector('[data-el="finish"]').classList.contains('hidden'), null, { timeout: 120000 });
+  await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/21-autopilot-finish.png` });
+  log('painel final', await page.evaluate(() => document.querySelector('[data-el="finish"]').innerText.replace(/\n+/g, ' | ')));
   log('final', await state(page));
 }
 
@@ -140,20 +142,27 @@ async function touchSession(viewport, prefix) {
   await page.screenshot({ path: `${OUT}/${prefix}-driving.png` });
   const after = await state(page);
   log('toque: virando (yaw antes/depois)', before.yaw, after.yaw, 'vel', after.speed);
-  const steer = await page.evaluate(() => window.__game.input.drive);
+  const steer = await page.evaluate(() => window.__game.input.update());
   log('comando combinado', JSON.stringify(steer));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await page.waitForTimeout(300);
-  log('toque: soltou', JSON.stringify(await page.evaluate(() => window.__game.input.drive)));
+  log('toque: soltou', JSON.stringify(await page.evaluate(() => window.__game.input.update())));
   // Dedo na divisa entre ACELERA e DRIFT
   const drift = await rect('.tb-drift');
   const mid = { x: (gas.x + drift.x) / 2, y: (gas.y + drift.y) / 2 };
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: mid.x, y: mid.y, id: 3 }] });
   await page.waitForTimeout(100);
-  log('divisa acelera/drift', JSON.stringify(await page.evaluate(() => window.__game.input.drive)));
+  log('divisa acelera/drift', JSON.stringify(await page.evaluate(() => window.__game.input.update())));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   const zoom = await page.evaluate(() => window.visualViewport.scale);
   log('zoom da página', zoom);
+  // Recuperação pelo botão de toque
+  const rec = await rect('.tb-recover');
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: rec.x, y: rec.y, id: 4 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(200);
+  log('botão recuperar', (await state(page)).recovery, 'penalidade', (await state(page)).penalties);
+  await page.context().close();
 }
 
 if (scenario === 'mobile') {

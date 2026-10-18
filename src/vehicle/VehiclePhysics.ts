@@ -50,6 +50,8 @@ export class VehiclePhysics {
   driftBlend = 0;
   drifting = false;
   impactTimer = 0;
+  /** Tempo restante considerando o carro encostado em algo (renovado pelas colisões). */
+  contactTimer = 0;
 
   // Saídas para efeitos visuais
   forwardSpeed = 0;
@@ -84,6 +86,7 @@ export class VehiclePhysics {
     this.driftBlend = 0;
     this.drifting = false;
     this.impactTimer = 0;
+    this.contactTimer = 0;
     this.forwardSpeed = this.lateralSpeed = 0;
     this.bodyRoll = this.bodyPitch = 0;
     this.skid = 0;
@@ -198,6 +201,16 @@ export class VehiclePhysics {
       } else {
         // Com aderência, o giro respeita (com folga) o que os pneus aguentam.
         yawLimit = Math.min(p.maxYawRate, (p.lateralGrip * 1.3) / Math.max(speed, 1));
+      }
+    }
+    // Ajuda arcade: encostado numa barreira e quase parado, o carro consegue
+    // girar devagar no lugar para se soltar (em vez de ficar preso de bico).
+    if (this.contactTimer > 0) {
+      this.contactTimer -= dt;
+      const pedal = throttle > 0 ? 1 : brake > 0 ? -1 : 0;
+      if (pedal !== 0 && speed < 2) {
+        const unstick = -this.steer * p.wallTurnRate * pedal;
+        if (Math.abs(unstick) > Math.abs(targetYaw)) targetYaw = unstick;
       }
     }
     targetYaw = clamp(targetYaw, -yawLimit, yawLimit);

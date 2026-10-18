@@ -81,6 +81,23 @@ describe('corrida', () => {
     expect(impacted).toBe(true);
   });
 
+  it('consegue se soltar quando fica de bico na barreira', () => {
+    const sim = newSim();
+    // Na reta de largada, virado 90° para a barreira interna (esquerda do piloto).
+    const s = geo.sample(geo.startSampleIndex + 40);
+    const yaw = Math.atan2(s.nx, s.nz);
+    sim.vehicle.reset(s.x + s.nx * (geo.halfWidth - 0.2), s.z + s.nz * (geo.halfWidth - 0.2), yaw);
+    sim.progressIndex = geo.startSampleIndex + 40;
+    drive(sim, { throttle: 1 }, 0.6); // encosta e fica empurrando
+    const pinnedYaw = sim.vehicle.yaw;
+    drive(sim, { throttle: 1, steer: 1 }, 1.5); // acelera e vira para a direita (sentido da pista)
+    const turned = Math.abs(sim.vehicle.yaw - pinnedYaw);
+    const lat = geo.lateralOffset(sim.vehicle.x, sim.vehicle.z, geo.nearestSample(sim.vehicle.x, sim.vehicle.z));
+    console.log(`desencalhar: girou ${turned.toFixed(2)} rad, vel=${sim.vehicle.speed.toFixed(1)}, lateral=${lat.toFixed(2)}`);
+    expect(turned).toBeGreaterThan(0.8);
+    expect(sim.vehicle.speed).toBeGreaterThan(2);
+  });
+
   it('cai da mesa na zona de queda, reaparece num ponto seguro e recebe penalidade', () => {
     const sim = newSim();
     // Leva o carro até o início da zona de queda, alinhado com a pista.

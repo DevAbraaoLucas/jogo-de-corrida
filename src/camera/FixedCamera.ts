@@ -52,14 +52,17 @@ export class FixedCamera {
     this.offset.set(Math.cos(pitch) * Math.sin(az), Math.sin(pitch), Math.cos(pitch) * Math.cos(az));
 
     const extra = { ...insets };
-    for (let attempt = 0; attempt < 40; attempt++) {
+    for (let attempt = 0; attempt < 60; attempt++) {
       this.fitToRegion(width, height, extra);
       const hit = this.blockedHit(width, height, blocked);
       if (!hit) break;
-      // Afasta a pista do controle: reserva mais espaço embaixo/nas laterais.
-      extra.bottom += height * 0.02;
-      if (hit === 'left') extra.left += width * 0.01;
-      if (hit === 'right') extra.right += width * 0.01;
+      // Afasta a pista do elemento que está no caminho, pelo lado em que ele está.
+      const cx = (hit.left + hit.right) / 2 / width;
+      const cy = (hit.top + hit.bottom) / 2 / height;
+      if (cy < 0.5) extra.top += height * 0.012;
+      else extra.bottom += height * 0.012;
+      if (cx < 0.35) extra.left += width * 0.008;
+      else if (cx > 0.65) extra.right += width * 0.008;
     }
   }
 
@@ -112,17 +115,14 @@ export class FixedCamera {
     cam.updateProjectionMatrix();
   }
 
-  private blockedHit(width: number, height: number, blocked: PixelRect[]): 'left' | 'right' | 'center' | null {
+  private blockedHit(width: number, height: number, blocked: PixelRect[]): PixelRect | null {
     if (blocked.length === 0) return null;
     for (const p of this.points) {
       this.tmp.copy(p).project(this.camera);
       const px = (this.tmp.x * 0.5 + 0.5) * width;
       const py = (-this.tmp.y * 0.5 + 0.5) * height;
       for (const r of blocked) {
-        if (px >= r.left && px <= r.right && py >= r.top && py <= r.bottom) {
-          const cx = (r.left + r.right) / 2;
-          return cx < width * 0.4 ? 'left' : cx > width * 0.6 ? 'right' : 'center';
-        }
+        if (px >= r.left && px <= r.right && py >= r.top && py <= r.bottom) return r;
       }
     }
     return null;

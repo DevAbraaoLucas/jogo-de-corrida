@@ -81,8 +81,10 @@ body {
 }
 
 .hud:not(.running) .hud-top .card,
-.hud:not(.running) .speed {
+.hud:not(.running) .speed,
+.hud:not(.running) .icon-btn {
   opacity: 0;
+  visibility: hidden;
 }
 
 .card {
@@ -260,6 +262,11 @@ body {
   opacity: 1;
   transform: translate(-50%, -6px) scale(1);
   animation: wobble 0.5s ease-in-out infinite alternate;
+}
+
+.best-card div,
+.best-card small {
+  white-space: nowrap;
 }
 
 .center-msg {
@@ -754,7 +761,63 @@ kbd {
 @media (orientation: portrait) {
   .hud[data-scheme='touch'] .speed {
     bottom: auto;
-    top: calc(var(--sa-top) + 64px);
+    top: calc(var(--sa-top) + 62px);
+  }
+  .hud[data-scheme='touch'] .drift-tag {
+    left: 100%;
+    bottom: auto;
+    top: 50%;
+    transform: translate(8px, -50%) scale(0.6);
+  }
+  .hud[data-scheme='touch'] .drift-tag.on {
+    transform: translate(8px, -50%) scale(1);
+  }
+}
+
+/* Celular estreito: o reinício fica no menu de pausa. */
+@media (max-width: 480px) {
+  .hud-right [data-el='restartBtn'],
+  .best-card .long {
+    display: none;
+  }
+  .hud-top {
+    gap: 6px;
+  }
+  .race-card {
+    gap: 8px;
+  }
+  .lap {
+    padding-right: 8px;
+  }
+  .best-card div {
+    gap: 6px;
+  }
+  .best-card span {
+    font-size: 14px;
+  }
+}
+
+/* Telas baixas (celular deitado): HUD mais compacto para sobrar altura para a pista. */
+@media (max-height: 430px) {
+  .hud-top {
+    top: calc(var(--sa-top) + 6px);
+  }
+  .card {
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .time {
+    font-size: 20px;
+  }
+  .lap b {
+    font-size: 22px;
+  }
+  .best-card span {
+    font-size: 14px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -799,10 +862,10 @@ kbd {
 
 @keyframes wobble {
   from {
-    transform: translate(-50%, -6px) rotate(-3deg);
+    rotate: -3deg;
   }
   to {
-    transform: translate(-50%, -6px) rotate(3deg);
+    rotate: 3deg;
   }
 }
 
@@ -840,4 +903,11 @@ kbd {
   text-align: center;
   padding: 24px;
   color: #fff;
+}
+
+/* Telas muito estreitas (320px): a melhor volta aparece na pausa e no resultado. */
+@media (max-width: 345px) {
+  .best-card {
+    display: none;
+  }
 }

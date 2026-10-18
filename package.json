@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "track:dump": "tsx scripts/dump-track.ts"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.2.6",

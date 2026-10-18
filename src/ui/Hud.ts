@@ -56,7 +56,7 @@ export class Hud {
         <div class="hud-right">
           <div class="card best-card">
             <div><small>VOLTA ATUAL</small><span data-el="lapTime">0:00.00</span></div>
-            <div><small>MELHOR VOLTA</small><span data-el="best">--:--.--</span></div>
+            <div><small>MELHOR<span class="long"> VOLTA</span></small><span data-el="best">--:--.--</span></div>
           </div>
           <button class="icon-btn" data-el="restartBtn" aria-label="Reiniciar corrida" title="Reiniciar corrida">${ICON_RESTART}</button>
           <button class="icon-btn" data-el="pauseBtn" aria-label="Pausar" title="Pausar (Esc)">${ICON_PAUSE}</button>
@@ -126,10 +126,13 @@ export class Hud {
     this.el.menuLaps.textContent = String(total);
   }
 
-  /** Áreas ocupadas no topo (px) — usadas para enquadrar a câmera. */
-  topInset(): number {
-    const a = this.el.raceCard.getBoundingClientRect();
-    return a.bottom + 6;
+  /** Elementos do topo que não devem cobrir a pista (usados para enquadrar a câmera). */
+  topRects(): DOMRect[] {
+    const pad = 6;
+    return [this.el.raceCard, this.root.querySelector('.hud-right') as HTMLElement].map((e) => {
+      const r = e.getBoundingClientRect();
+      return new DOMRect(r.left - pad, r.top - pad, r.width + pad * 2, r.height + pad * 2);
+    });
   }
 
   speedRect(): DOMRect {

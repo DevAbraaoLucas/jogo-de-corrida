@@ -125,7 +125,7 @@ export class Game {
     const vehicle = VEHICLES.fusca;
     this.sim = new RaceSimulation(this.geo, { ...vehicle.params }, this.records);
     this.view = new VehicleView(vehicle.buildModel());
-    this.scene.add(this.view.model.root, this.view.ring, this.skids.mesh, this.particles.mesh);
+    this.scene.add(this.view.model.root, this.view.marker, this.view.ring, this.skids.mesh, this.particles.mesh);
 
     // --- Interface e controles ---
     this.hud = new Hud(document.body);
@@ -218,8 +218,8 @@ export class Game {
     const w = this.container.clientWidth || window.innerWidth;
     const h = this.container.clientHeight || window.innerHeight;
     this.renderer.setSize(w, h);
-    const blocked = [...this.touch.blockedRects(), this.hud.speedRect()];
-    this.cam.fit(w, h, { top: this.hud.topInset(), right: 12, bottom: 12, left: 12 }, blocked);
+    const blocked = [...this.touch.blockedRects(), this.hud.speedRect(), ...this.hud.topRects()];
+    this.cam.fit(w, h, { top: 12, right: 12, bottom: 12, left: 12 }, blocked);
     const dist = this.cam.camera.position.distanceTo(this.track.fitPoints[0]);
     const fog = this.scene.fog as Fog;
     fog.near = dist + 14;
@@ -239,7 +239,7 @@ export class Game {
     }
 
     let drive = this.input.update();
-    if (this.autopilot && this.state === 'racing') drive = this.autopilot.update(this.sim);
+    if (this.autopilot && this.state === 'racing') drive = this.autopilot.update(this.sim, dt);
 
     if (this.state === 'countdown') this.updateCountdown(dt);
     if (this.state === 'finished' && this.finishTimer >= 0) {

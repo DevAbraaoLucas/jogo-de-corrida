@@ -1,7 +1,8 @@
-import { Mesh, MeshBasicMaterial, RingGeometry } from 'three';
+import { Mesh, MeshBasicMaterial, PlaneGeometry, RingGeometry } from 'three';
 import { GAME_CONFIG } from '../core/config';
 import { lerp, lerpAngle } from '../core/math';
 import type { RaceSimulation } from '../race/RaceSimulation';
+import { playerMarkerTexture } from '../track/textures';
 import type { CarModel } from './VehicleModel';
 import type { VehiclePhysics } from './VehiclePhysics';
 
@@ -19,8 +20,17 @@ export class VehicleView {
   private antennaVelX = 0;
   private antennaVelZ = 0;
   readonly ring: Mesh;
+  /** Marcador no chão que ajuda a achar o carro em telas pequenas. */
+  readonly marker: Mesh;
 
   constructor(readonly model: CarModel) {
+    this.marker = new Mesh(
+      new PlaneGeometry(1.7, 1.7),
+      new MeshBasicMaterial({ map: playerMarkerTexture(), transparent: true, opacity: 0.55, depthWrite: false }),
+    );
+    // Deita o plano e gira para a seta da textura apontar para a frente do carro (+Z).
+    this.marker.geometry.rotateX(-Math.PI / 2).rotateY(Math.PI);
+    this.marker.renderOrder = 2;
     // Anel que aparece no ponto de reaparecimento.
     this.ring = new Mesh(
       new RingGeometry(0.55, 0.75, 32),
@@ -67,6 +77,9 @@ export class VehicleView {
     if (sim.recovery === 'falling' && sim.recoveryTimer > GAME_CONFIG.fallDuration - 0.12) visible = false;
     m.root.visible = visible;
     m.root.position.y = y;
+    this.marker.visible = visible && !sim.vehicle.falling;
+    this.marker.position.set(x, 0.024, z);
+    this.marker.rotation.y = m.root.rotation.y;
 
     m.body.rotation.z = -v.bodyRoll;
     m.body.rotation.x = v.bodyPitch;
@@ -98,5 +111,9 @@ export class VehicleView {
     this.model.disposer.dispose();
     this.ring.geometry.dispose();
     (this.ring.material as MeshBasicMaterial).dispose();
+    const markerMat = this.marker.material as MeshBasicMaterial;
+    markerMat.map?.dispose();
+    markerMat.dispose();
+    this.marker.geometry.dispose();
   }
 }
