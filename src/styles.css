@@ -185,7 +185,7 @@ body {
   gap: 12px;
 }
 
-.best-card span {
+.best-card div > span {
   font-weight: 600;
   font-size: 16px;
   font-variant-numeric: tabular-nums;
@@ -792,7 +792,7 @@ kbd {
   .best-card div {
     gap: 6px;
   }
-  .best-card span {
+  .best-card div > span {
     font-size: 14px;
   }
 }
@@ -812,7 +812,7 @@ kbd {
   .lap b {
     font-size: 22px;
   }
-  .best-card span {
+  .best-card div > span {
     font-size: 14px;
   }
   .icon-btn {

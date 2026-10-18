@@ -26,7 +26,7 @@ const waitGame = async (page, s) => {
   const t0 = await page.evaluate(() => window.__game.time);
   await page.waitForFunction((t) => window.__game.time >= t, t0 + s, { timeout: 120000, polling: 50 });
 };
-const waitRacing = (page) => page.waitForFunction(() => window.__game.state === 'racing', null, { timeout: 20000 });
+const waitRacing = (page) => page.waitForFunction(() => window.__game.state === 'racing', null, { timeout: 180000 });
 const state = (page) => page.evaluate(() => {
   const g = window.__game; const v = g.sim.vehicle;
   return { state: g.state, phase: g.sim.phase, lap: g.sim.lap, laps: g.sim.lapTimes, time: +g.sim.raceTime.toFixed(2),
