@@ -1,0 +1,25 @@
+{
+  "name": "rc-mini-racers",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/fredoka": "^5.2.6",
+    "three": "^0.178.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.178.1",
+    "playwright": "^1.56.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.4.4",
+    "vitest": "^5.0.5"
+  }
+}
